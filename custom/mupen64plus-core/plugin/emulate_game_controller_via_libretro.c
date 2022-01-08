@@ -75,18 +75,20 @@ static get_keys_t getKeys = inputGetKeys_default;
 
 static void inputGetKeys_default_descriptor(void)
 {
+#if 0 // never specializing
    if (alternate_mapping)
+#endif
    {
       #define independent_cbuttons_map(PAD) \
-      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "A Button" },\
-      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "B Button" },\
-      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R,      "C-Right" },\
-      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L,      "C-Left" },\
-      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "C-Down" },\
+      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_C,      "A Button" },\
+      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Z,      "B Button" },\
+      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "C-Right" },\
+      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "C-Left" },\
+      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "C-Down" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "C-Up" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2,     "Z Trigger" },\
-      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,     "R Shoulder" },\
-      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "L Shoulder" },\
+      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R,      "R Shoulder" },\
+      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L,      "L Shoulder" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,   "D-Pad Left" },\
@@ -106,6 +108,7 @@ static void inputGetKeys_default_descriptor(void)
       };
       environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
    }
+#if 0 // never specializing
    else
    {
       #define standard_map(PAD) \
@@ -136,6 +139,7 @@ static void inputGetKeys_default_descriptor(void)
       };
       environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
    }
+#endif
 }
 
 /* Mupen64Plus plugin functions */
@@ -312,7 +316,7 @@ void inputGetKeys_default( int Control, BUTTONS *Keys )
 {
    unsigned i;
    bool cbuttons_mode = false;
-   int16_t ret        = 0;
+   int32_t ret        = 0;
    int16_t analogX    = 0;
    int16_t analogY    = 0;
    Keys->Value        = 0;
@@ -322,7 +326,7 @@ void inputGetKeys_default( int Control, BUTTONS *Keys )
             0, RETRO_DEVICE_ID_JOYPAD_MASK);
    else
    {
-      for (i = 0; i <= RETRO_DEVICE_ID_JOYPAD_R3; i++)
+      for (i = 0; i <= RETRO_DEVICE_ID_JOYPAD_MENU; i++)
       {
          if (input_cb(Control, RETRO_DEVICE_JOYPAD, 0, i))
             ret |= (1 << i);
@@ -336,17 +340,20 @@ void inputGetKeys_default( int Control, BUTTONS *Keys )
    Keys->START_BUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_START)));
    Keys->Z_TRIG       = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_L2)));
 
+#if 0 // never specializing
    if (alternate_mapping)
+#endif
    {
-      Keys->A_BUTTON  = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_B)));
-      Keys->B_BUTTON  = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_Y)));
-      Keys->R_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_R)));
-      Keys->L_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_L)));
-      Keys->D_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_A)));
+      Keys->A_BUTTON  = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_C)));
+      Keys->B_BUTTON  = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_Z)));
+      Keys->R_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_A)));
+      Keys->L_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_Y)));
+      Keys->D_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_B)));
       Keys->U_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_X)));
-      Keys->R_TRIG    = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_R2)));
-      Keys->L_TRIG    = !!((ret & (1 <<RETRO_DEVICE_ID_JOYPAD_SELECT)));
+      Keys->R_TRIG    = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_R)));
+      Keys->L_TRIG    = !!((ret & (1 <<RETRO_DEVICE_ID_JOYPAD_L)));
    }
+#if 0 // never specializing
    else
    {
       Keys->R_TRIG    = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_R)));
@@ -367,6 +374,7 @@ void inputGetKeys_default( int Control, BUTTONS *Keys )
          Keys->B_BUTTON  = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_Y)));
       }
    }
+#endif
 
    // C buttons
    analogX = input_cb(Control, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_X);
