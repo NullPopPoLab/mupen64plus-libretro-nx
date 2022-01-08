@@ -87,7 +87,8 @@ static void inputGetKeys_default_descriptor(void)
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "C-Down" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "C-Up" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2,     "Z Trigger" },\
-      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R,      "R Shoulder" },\
+      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R,      "R Shoulder (for D-Pad)" },\
+      { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,     "R Shoulder (for Analog)" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L,      "L Shoulder" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },\
       { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },\
@@ -350,7 +351,8 @@ void inputGetKeys_default( int Control, BUTTONS *Keys )
       Keys->L_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_Y)));
       Keys->D_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_B)));
       Keys->U_CBUTTON = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_X)));
-      Keys->R_TRIG    = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_R)));
+      Keys->R_TRIG    = !!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_R))) ||
+		!!((ret & (1 << RETRO_DEVICE_ID_JOYPAD_R2)));
       Keys->L_TRIG    = !!((ret & (1 <<RETRO_DEVICE_ID_JOYPAD_L)));
    }
 #if 0 // never specializing
