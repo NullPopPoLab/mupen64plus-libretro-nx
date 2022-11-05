@@ -65,6 +65,25 @@ struct retro_core_option_v2_category option_cats_us[] = {
 
 struct retro_core_option_v2_definition option_defs_us[] = {
     {
+        CORE_NAME "-rdp-plugin",
+        "RDP Plugin",
+        NULL,
+        "Select a RDP Plugin, use Angrylion (if available) for best compability, GLideN64 for Performance",
+        NULL,
+        NULL,
+        {
+#ifdef HAVE_THR_AL
+            {"angrylion", "Angrylion"},
+#endif
+#ifdef HAVE_PARALLEL_RDP
+            {"parallel", "ParaLLEl-RDP"},
+#endif
+            {"gliden64", "GLideN64"},
+            { NULL, NULL },
+        },
+        "gliden64"
+    },
+    {
         CORE_NAME "-43screensize",
         "4:3 Resolution",
         NULL,
@@ -397,6 +416,20 @@ struct retro_core_option_v2_definition option_defs_us[] = {
             { NULL, NULL },
         },
         "Off"
+    },
+    {
+        CORE_NAME "-EnableInaccurateTextureCoordinates",
+        "Enable inaccurate texture coordinates",
+        NULL,
+        "(GLN64) Enables inaccurate texture coordinate calculations. This can improve performance and texture pack compatibity at the cost of accuracy.",
+        "Enables inaccurate texture coordinate calculations. This can improve performance and texture pack compatibity at the cost of accuracy.",
+        "gliden64",
+        {
+            {"False", NULL},
+            {"True", NULL},
+            { NULL, NULL },
+        },
+        "False"
     },
     {
         CORE_NAME "-EnableTexCoordBounds",
@@ -769,6 +802,27 @@ struct retro_core_option_v2_definition option_defs_us[] = {
             {"48", NULL},
             {"49", NULL},
             {"50", NULL},
+            { NULL, NULL },
+        },
+        "0"
+    },
+    {
+        CORE_NAME "-MaxHiResTxVramLimit",
+        "Max High-Res VRAM Limit",
+        NULL,
+        "(GLN64) Limit High-Res textures size in VRAM (in MB, 0 = no limit).",
+        "Limit High-Res textures size in VRAM (in MB, 0 = no limit).",
+        "gliden64",
+        {
+            {"0", NULL},
+            {"500", NULL},
+            {"1000", NULL},
+            {"1500", NULL},
+            {"2000", NULL},
+            {"2500", NULL},
+            {"3000", NULL},
+            {"3500", NULL},
+            {"4000", NULL},
             { NULL, NULL },
         },
         "0"
@@ -1324,25 +1378,6 @@ struct retro_core_option_v2_definition option_defs_us[] = {
 #endif
     },
     {
-        CORE_NAME "-rdp-plugin",
-        "RDP Plugin",
-        NULL,
-        "Select a RDP Plugin, use Angrylion (if available) for best compability, GLideN64 for Performance",
-        NULL,
-        NULL,
-        {
-#ifdef HAVE_THR_AL
-            {"angrylion", "Angrylion"},
-#endif
-#ifdef HAVE_PARALLEL_RDP
-            {"parallel", "ParaLLEl-RDP"},
-#endif
-            {"gliden64", "GLideN64"},
-            { NULL, NULL },
-        },
-        "gliden64"
-    },
-    {
         CORE_NAME "-rsp-plugin",
         "RSP Plugin",
         NULL,
@@ -1451,6 +1486,30 @@ struct retro_core_option_v2_definition option_defs_us[] = {
             {"3", NULL},
             {"4", NULL},
             {"5", NULL},
+            { NULL, NULL },
+        },
+        "0"
+    },
+    {
+        CORE_NAME "-CountPerOpDenomPot",
+        "Count Per Op Divider (Overclock)",
+        NULL,
+        "Denominator for Count per Op (allowing sub-1 Count per Op in practice). Changing this can break stuff!",
+        NULL,
+        NULL,
+        {
+            {"0", NULL},
+            {"1", NULL},
+            {"2", NULL},
+            {"3", NULL},
+            {"4", NULL},
+            {"5", NULL},
+            {"6", NULL},
+            {"7", NULL},
+            {"8", NULL},
+            {"9", NULL},
+            {"10", NULL},
+            {"11", NULL},
             { NULL, NULL },
         },
         "0"
@@ -1700,8 +1759,6 @@ static INLINE void libretro_set_core_options(retro_environment_t environ_cb,
 
    if (!environ_cb(RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION, &version))
       version = 0;
-
-   CoreOptionVersion = version;
 
    if (version >= 2)
    {

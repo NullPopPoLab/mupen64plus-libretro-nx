@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <compat/strl.h>
 
 #include "libretro.h"
 #include "libretro_private.h"
@@ -144,6 +145,8 @@ uint32_t screen_pitch = 0;
 
 float retro_screen_aspect = 4.0 / 3.0;
 
+static char rdp_plugin_last[32] = {0};
+
 // Savestate globals
 bool retro_savestate_complete = false;
 int  retro_savestate_result = 0;
@@ -156,8 +159,8 @@ char* retro_dd_path_rom = NULL;
 char* retro_transferpak_rom_path = NULL;
 char* retro_transferpak_ram_path = NULL;
 
-uint32_t CoreOptionVersion = 0;
 uint32_t CoreOptionCategoriesSupported = 0;
+uint32_t CoreOptionUpdateDisplayCbSupported = 0;
 uint32_t bilinearMode = 0;
 uint32_t EnableHybridFilter = 0;
 uint32_t EnableDitheringPattern = 0;
@@ -166,12 +169,14 @@ uint32_t EnableDitheringQuantization = 0;
 uint32_t EnableHWLighting = 0;
 uint32_t CorrectTexrectCoords = 0;
 uint32_t EnableTexCoordBounds = 0;
+uint32_t EnableInaccurateTextureCoordinates = 0;
 uint32_t enableNativeResTexrects = 0;
 uint32_t enableLegacyBlending = 0;
 uint32_t EnableCopyColorToRDRAM = 0;
 uint32_t EnableCopyDepthToRDRAM = 0;
 uint32_t AspectRatio = 0;
 uint32_t MaxTxCacheSize = 0;
+uint32_t MaxHiResTxVramLimit = 0;
 uint32_t txFilterMode = 0;
 uint32_t txEnhancementMode = 0;
 uint32_t txHiresEnable = 0;
@@ -206,6 +211,7 @@ uint32_t OverscanBottom = 0;
 
 uint32_t EnableFullspeed = 0;
 uint32_t CountPerOp = 0;
+uint32_t CountPerOpDenomPot = 0;
 uint32_t CountPerScanlineOverride = 0;
 uint32_t ForceDisableExtraMem = 0;
 uint32_t IgnoreTLBExceptions = 0;
@@ -239,8 +245,95 @@ static void n64DebugCallback(void* aContext, int aLevel, const char* aMessage)
 
 extern m64p_rom_header ROM_HEADER;
 
+static bool set_variable_visibility(void)
+{
+    // For simplicity we create a prepared var per plugin, maybe create a macro for this?
+    struct retro_core_option_display option_display_gliden64;
+    struct retro_core_option_display option_display_angrylion;
+    struct retro_core_option_display option_display_parallel_rdp;
+
+    size_t i;
+    size_t num_options = 0;
+    char **values_buf = NULL;
+    struct retro_variable var;
+    const char *rdp_plugin_current = "__NULL__";
+    bool rdp_plugin_found = false;
+
+    // If option categories are supported but
+    // the option update display callback is not,
+    // then all options should be shown,
+    // i.e. do nothing
+    if (CoreOptionCategoriesSupported && !CoreOptionUpdateDisplayCbSupported)
+        return false;
+
+    // Get current plugin
+    var.key = CORE_NAME "-rdp-plugin";
+    var.value = NULL;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    {
+        rdp_plugin_current = var.value;
+        rdp_plugin_found = true;
+    }
+
+    // Check if plugin has changed since last
+    // call of this function
+    if (!strcmp(rdp_plugin_last, rdp_plugin_current))
+        return false;
+
+    strlcpy(rdp_plugin_last, rdp_plugin_current, sizeof(rdp_plugin_last));
+
+    // Show/hide options depending on Plugins (Active isn't relevant!)
+    if (rdp_plugin_found)
+    {
+        option_display_gliden64.visible = !strcmp(rdp_plugin_current, "gliden64");
+        option_display_angrylion.visible = !strcmp(rdp_plugin_current, "angrylion");
+        option_display_parallel_rdp.visible = !strcmp(rdp_plugin_current, "parallel");
+    } else {
+        option_display_gliden64.visible = option_display_angrylion.visible = option_display_parallel_rdp.visible = true;
+    }
+
+    // Determine number of options
+    for (;;)
+    {
+        if (!option_defs_us[num_options].key)
+            break;
+        num_options++;
+    }
+
+    // Copy parameters from option_defs_us array
+    for (i = 0; i < num_options; i++)
+    {
+        const char *key  = option_defs_us[i].key;
+        const char *hint = option_defs_us[i].info;
+        if (hint)
+        {
+            // Quick and dirty, its the only consistent naming
+            // Otherwise GlideN64 Setting keys will need to be broken again..
+            if (!!strstr(hint, "(GLN64)"))
+            {
+                option_display_gliden64.key = key;
+                environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_gliden64);
+            } else if (!!strstr(hint, "(AL)"))
+            {
+                option_display_angrylion.key = key;
+                environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_angrylion);
+            } else if (!!strstr(key, "parallel-rdp")) // Maybe unify it later?
+            {
+                option_display_parallel_rdp.key = key;
+                environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_parallel_rdp);
+            }
+        }
+    }
+
+    return true;
+}
+
 static void setup_variables(void)
 {
+    bool categoriesSupported = false;
+    bool updateDisplayCbSupported = false;
+    struct retro_core_options_update_display_callback updateDisplayCb;
+
     static const struct retro_controller_description port[] = {
         { "Controller", RETRO_DEVICE_JOYPAD },
         { "RetroPad", RETRO_DEVICE_JOYPAD },
@@ -254,67 +347,18 @@ static void setup_variables(void)
         { 0, 0 }
     };
 
-    libretro_set_core_options(environ_cb, (bool*)&CoreOptionCategoriesSupported);
+    libretro_set_core_options(environ_cb, &categoriesSupported);
+    if (categoriesSupported)
+        CoreOptionCategoriesSupported = 1;
+
+    updateDisplayCb.callback = set_variable_visibility;
+    updateDisplayCbSupported = environ_cb(
+            RETRO_ENVIRONMENT_SET_CORE_OPTIONS_UPDATE_DISPLAY_CALLBACK,
+            &updateDisplayCb);
+    if (updateDisplayCbSupported)
+        CoreOptionUpdateDisplayCbSupported = 1;
+
     environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
-}
-
-// Deprecated with Core Option Categories
-static void set_variable_visibility(void)
-{
-   // For simplicity we create a prepared var per plugin, maybe create a macro for this?
-   struct retro_core_option_display option_display_gliden64;
-   struct retro_core_option_display option_display_angrylion;
-   struct retro_core_option_display option_display_parallel_rdp;
-
-   size_t i;
-   size_t num_options = 0;
-   char **values_buf = NULL;
-   struct retro_variable var;
-
-   // Show/hide options depending on Plugins (Active isn't relevant!)
-   var.key = CORE_NAME "-rdp-plugin";
-   var.value = NULL;
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-      option_display_gliden64.visible = !strcmp(var.value, "gliden64");
-      option_display_angrylion.visible = !strcmp(var.value, "angrylion");
-      option_display_parallel_rdp.visible = !strcmp(var.value, "parallel");
-   } else {
-      option_display_gliden64.visible = option_display_angrylion.visible = option_display_parallel_rdp.visible = true;
-   }
-
-   // Determine number of options
-   for (;;)
-   {
-      if (!option_defs_us[num_options].key)
-         break;
-      num_options++;
-   }
-
-   // Copy parameters from option_defs_us array
-   for (i = 0; i < num_options; i++)
-   {
-      const char *key  = option_defs_us[i].key;
-      const char *hint = option_defs_us[i].info;
-      if(hint)
-      {
-         // Quick and dirty, its the only consistent naming
-         // Otherwise GlideN64 Setting keys will need to be broken again..
-         if(!!strstr(hint, "(GLN64)"))
-         {
-            option_display_gliden64.key = key;
-            environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_gliden64);
-         } else if(!!strstr(hint, "(AL)"))
-         {
-            option_display_angrylion.key = key;
-            environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_angrylion);
-         } else if(!!strstr(key, "parallel-rdp")) // Maybe unify it later?
-         {
-            option_display_parallel_rdp.key = key;
-            environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_parallel_rdp);
-         }
-      }
-   } 
 }
 
 static void cleanup_global_paths()
@@ -608,7 +652,7 @@ void retro_set_environment(retro_environment_t cb)
 void retro_get_system_info(struct retro_system_info *info)
 {
     info->library_name = "Mupen64Plus-Next";
-    info->library_version = "2.3" FLAVOUR_VERSION GIT_VERSION;
+    info->library_version = "2.4" FLAVOUR_VERSION GIT_VERSION;
     info->valid_extensions = "n64|v64|z64|bin|u1";
     info->need_fullpath = false;
     info->block_extract = false;
@@ -699,6 +743,10 @@ void retro_deinit(void)
 
     if (perf_cb.perf_log)
         perf_cb.perf_log();
+
+    rdp_plugin_last[0] = '\0';
+    CoreOptionCategoriesSupported = 0;
+    CoreOptionUpdateDisplayCbSupported = 0;
 }
 
 void update_controllers()
@@ -1029,6 +1077,13 @@ static void update_variables(bool startup)
           EnableTexCoordBounds = !strcmp(var.value, "False") ? 0 : 1;
        }
 
+       var.key = CORE_NAME "-EnableInaccurateTextureCoordinates";
+       var.value = NULL;
+       if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+       {
+          EnableInaccurateTextureCoordinates = !strcmp(var.value, "False") ? 0 : 1;
+       }
+
        var.key = CORE_NAME "-BackgroundMode";
        var.value = NULL;
        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -1135,6 +1190,13 @@ static void update_variables(bool startup)
        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
        {
           txHiresFullAlphaChannel = !strcmp(var.value, "False") ? 0 : 1;
+       }
+
+       var.key = CORE_NAME "-MaxHiResTxVramLimit";
+       var.value = NULL;
+       if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+       {
+          MaxHiResTxVramLimit = atoi(var.value);
        }
 
        var.key = CORE_NAME "-MaxTxCacheSize";
@@ -1299,6 +1361,13 @@ static void update_variables(bool startup)
           CountPerOp = atoi(var.value);
        }
        
+       var.key = CORE_NAME "-CountPerOpDenomPot";
+       var.value = NULL;
+       if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+       {
+          CountPerOpDenomPot = atoi(var.value);
+       }
+
        if(EnableFullspeed)
        {
           CountPerOp = 1; // Force CountPerOp == 1
@@ -1662,9 +1731,8 @@ static void update_variables(bool startup)
 
     update_controllers();
 
-    // Compat hiding of options
-    if(!CoreOptionCategoriesSupported)
-      set_variable_visibility();
+    // Hide irrelevant options
+    set_variable_visibility();
 }
 
 static void format_saved_memory(void)

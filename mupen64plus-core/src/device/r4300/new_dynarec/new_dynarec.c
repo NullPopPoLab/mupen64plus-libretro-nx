@@ -2464,7 +2464,7 @@ static void ll_kill_pointers(struct ll_entry *head,intptr_t addr,int shift)
     {
       inv_debug("EXP: Kill pointer at %x (%x)\n",(intptr_t)head->addr,head->vaddr);
       uintptr_t host_addr=(intptr_t)kill_pointer(head->addr);
-      #if NEW_DYNAREC >= NEW_DYNAREC_ARM
+      #if NEW_DYNAREC == NEW_DYNAREC_ARM
         needs_clear_cache[(host_addr-(uintptr_t)base_addr)>>17]|=1<<(((host_addr-(uintptr_t)base_addr)>>12)&31);
       #else
         /* avoid unused variable warning */
@@ -2805,7 +2805,7 @@ static void invalidate_page(u_int page)
   while(head!=NULL) {
     inv_debug("INVALIDATE: kill pointer to %x (%x)\n",head->vaddr,(intptr_t)head->addr);
       uintptr_t host_addr=(intptr_t)kill_pointer(head->addr);
-    #if NEW_DYNAREC >= NEW_DYNAREC_ARM
+    #if NEW_DYNAREC == NEW_DYNAREC_ARM
       needs_clear_cache[(host_addr-(uintptr_t)base_addr)>>17]|=1<<(((host_addr-(uintptr_t)base_addr)>>12)&31);
     #else
       /* avoid unused variable warning */
@@ -4493,6 +4493,10 @@ static void do_cc(int i,signed char i_regmap[],int *adj,int addr,int taken,int i
     emit_jmp(0);
   }
   else if(*adj==0||invert) {
+    if(g_dev.r4300.cp0.count_per_op_denom_pot) {
+      count += (1 << g_dev.r4300.cp0.count_per_op_denom_pot) - 1;
+      count >>= g_dev.r4300.cp0.count_per_op_denom_pot;
+    }
     emit_addimm_and_set_flags(CLOCK_DIVIDER*(count+2),HOST_CCREG);
     jaddr=(intptr_t)out;
     emit_jns(0);
