@@ -96,14 +96,14 @@ static void inputGetKeys_default_descriptor(void)
          { PAD, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT,  RETRO_DEVICE_ID_ANALOG_X, "Control Stick X" },\
          { PAD, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT,  RETRO_DEVICE_ID_ANALOG_Y, "Control Stick Y" },
 
-         static struct retro_input_descriptor desc[] = {
+         static struct retro_input_descriptor desc0[] = {
             independent_cbuttons_map_0(0)
             independent_cbuttons_map_0(1)
             independent_cbuttons_map_0(2)
             independent_cbuttons_map_0(3)
             { 0 },
          };
-         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
+         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc0);
          break;
 
          case BTNMAP_ANALOG:
@@ -126,14 +126,14 @@ static void inputGetKeys_default_descriptor(void)
          { PAD, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_X, "Control Stick X" },\
          { PAD, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_Y, "Control Stick Y" },
 
-         static struct retro_input_descriptor desc[] = {
+         static struct retro_input_descriptor desc1[] = {
             independent_cbuttons_map_1(0)
             independent_cbuttons_map_1(1)
             independent_cbuttons_map_1(2)
             independent_cbuttons_map_1(3)
             { 0 },
          };
-         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
+         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc1);
          break;
 
          default:
@@ -156,14 +156,14 @@ static void inputGetKeys_default_descriptor(void)
          { PAD, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_X, "Control Stick X" },\
          { PAD, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_Y, "Control Stick Y" },
 
-         static struct retro_input_descriptor desc[] = {
+         static struct retro_input_descriptor desc2[] = {
             independent_cbuttons_map_2(0)
             independent_cbuttons_map_2(1)
             independent_cbuttons_map_2(2)
             independent_cbuttons_map_2(3)
             { 0 },
          };
-         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
+         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc2);
       }
 }
 
