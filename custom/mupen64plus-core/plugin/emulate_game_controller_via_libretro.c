@@ -77,7 +77,7 @@ static void inputGetKeys_default_descriptor(void)
 {
       switch(btnmap_selected){
          case BTNMAP_DUAL:
-         #define independent_cbuttons_map(PAD) \
+         #define independent_cbuttons_map_0(PAD) \
          { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_C,      "A Button" },\
          { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Z,      "B Button" },\
          { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "C-Right" },\
@@ -97,17 +97,17 @@ static void inputGetKeys_default_descriptor(void)
          { PAD, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT,  RETRO_DEVICE_ID_ANALOG_Y, "Control Stick Y" },
 
          static struct retro_input_descriptor desc[] = {
-            independent_cbuttons_map(0)
-            independent_cbuttons_map(1)
-            independent_cbuttons_map(2)
-            independent_cbuttons_map(3)
+            independent_cbuttons_map_0(0)
+            independent_cbuttons_map_0(1)
+            independent_cbuttons_map_0(2)
+            independent_cbuttons_map_0(3)
             { 0 },
          };
          environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
          break;
 
          case BTNMAP_ANALOG:
-         #define independent_cbuttons_map(PAD) \
+         #define independent_cbuttons_map_1(PAD) \
          { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_C,      "A Button" },\
          { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Z,      "B Button" },\
          { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "C-Right" },\
@@ -127,17 +127,17 @@ static void inputGetKeys_default_descriptor(void)
          { PAD, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_Y, "Control Stick Y" },
 
          static struct retro_input_descriptor desc[] = {
-            independent_cbuttons_map(0)
-            independent_cbuttons_map(1)
-            independent_cbuttons_map(2)
-            independent_cbuttons_map(3)
+            independent_cbuttons_map_1(0)
+            independent_cbuttons_map_1(1)
+            independent_cbuttons_map_1(2)
+            independent_cbuttons_map_1(3)
             { 0 },
          };
          environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
          break;
 
          default:
-         #define independent_cbuttons_map(PAD) \
+         #define independent_cbuttons_map_2(PAD) \
          { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_C,      "A Button" },\
          { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Z,      "B Button" },\
          { PAD, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "C-Right" },\
@@ -157,10 +157,10 @@ static void inputGetKeys_default_descriptor(void)
          { PAD, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT,  RETRO_DEVICE_ID_ANALOG_Y, "Control Stick Y" },
 
          static struct retro_input_descriptor desc[] = {
-            independent_cbuttons_map(0)
-            independent_cbuttons_map(1)
-            independent_cbuttons_map(2)
-            independent_cbuttons_map(3)
+            independent_cbuttons_map_2(0)
+            independent_cbuttons_map_2(1)
+            independent_cbuttons_map_2(2)
+            independent_cbuttons_map_2(3)
             { 0 },
          };
          environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
