@@ -118,11 +118,11 @@ cothread_t retro_thread;
 
 int astick_deadzone;
 int astick_sensitivity;
-int r_cbutton;
-int l_cbutton;
-int d_cbutton;
-int u_cbutton;
-bool alternate_mapping;
+
+#define BTNMAP_DEFAULT 0
+#define BTNMAP_ANALOG  1
+#define BTNMAP_DUAL    2
+char btnmap_selected=0;
 
 static uint8_t* game_data = NULL;
 static uint32_t game_size = 0;
@@ -1386,62 +1386,6 @@ static void update_variables(bool startup)
        }
 #endif // HAVE_THR_AL
 
-       var.key = CORE_NAME "-r-cbutton";
-       var.value = NULL;
-       if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-       {
-          if (!strcmp(var.value, "C1"))
-             r_cbutton = RETRO_DEVICE_ID_JOYPAD_A;
-          else if (!strcmp(var.value, "C2"))
-             r_cbutton = RETRO_DEVICE_ID_JOYPAD_Y;
-          else if (!strcmp(var.value, "C3"))
-             r_cbutton = RETRO_DEVICE_ID_JOYPAD_B;
-          else if (!strcmp(var.value, "C4"))
-             r_cbutton = RETRO_DEVICE_ID_JOYPAD_X;
-       }
-
-       var.key = CORE_NAME "-l-cbutton";
-       var.value = NULL;
-       if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-       {
-          if (!strcmp(var.value, "C1"))
-             l_cbutton = RETRO_DEVICE_ID_JOYPAD_A;
-          else if (!strcmp(var.value, "C2"))
-             l_cbutton = RETRO_DEVICE_ID_JOYPAD_Y;
-          else if (!strcmp(var.value, "C3"))
-             l_cbutton = RETRO_DEVICE_ID_JOYPAD_B;
-          else if (!strcmp(var.value, "C4"))
-             l_cbutton = RETRO_DEVICE_ID_JOYPAD_X;
-       }
-
-       var.key = CORE_NAME "-d-cbutton";
-       var.value = NULL;
-       if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-       {
-          if (!strcmp(var.value, "C1"))
-             d_cbutton = RETRO_DEVICE_ID_JOYPAD_A;
-          else if (!strcmp(var.value, "C2"))
-             d_cbutton = RETRO_DEVICE_ID_JOYPAD_Y;
-          else if (!strcmp(var.value, "C3"))
-             d_cbutton = RETRO_DEVICE_ID_JOYPAD_B;
-          else if (!strcmp(var.value, "C4"))
-             d_cbutton = RETRO_DEVICE_ID_JOYPAD_X;
-       }
-
-       var.key = CORE_NAME "-u-cbutton";
-       var.value = NULL;
-       if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-       {
-          if (!strcmp(var.value, "C1"))
-             u_cbutton = RETRO_DEVICE_ID_JOYPAD_A;
-          else if (!strcmp(var.value, "C2"))
-             u_cbutton = RETRO_DEVICE_ID_JOYPAD_Y;
-          else if (!strcmp(var.value, "C3"))
-             u_cbutton = RETRO_DEVICE_ID_JOYPAD_B;
-          else if (!strcmp(var.value, "C4"))
-             u_cbutton = RETRO_DEVICE_ID_JOYPAD_X;
-       }
-
        var.key = CORE_NAME "-EnableOverscan";
        var.value = NULL;
        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -1477,11 +1421,12 @@ static void update_variables(bool startup)
           OverscanBottom = atoi(var.value);
        }
 
-       var.key = CORE_NAME "-alt-map";
+       var.key = CORE_NAME "-controller";
        var.value = NULL;
        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
        {
-          alternate_mapping = !strcmp(var.value, "False") ? 0 : 1;
+          if(!strcmp(var.value, "analog"))btnmap_selected=BTNMAP_ANALOG;
+          if(!strcmp(var.value, "dual"))btnmap_selected=BTNMAP_DUAL;
        }
 
        var.key = CORE_NAME "-ForceDisableExtraMem";
