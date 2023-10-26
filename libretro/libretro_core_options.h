@@ -1567,79 +1567,16 @@ struct retro_core_option_v2_definition option_defs_us[] = {
         "100"
     },
     {
-        CORE_NAME "-r-cbutton",
-        "Right C Button",
+        CORE_NAME "-controller",
+        "Control Type",
         NULL,
-        "Select Right C Button mapping.",
-        NULL,
-        "input",
-        {
-            {"C1", NULL},
-            {"C2", NULL},
-            {"C3", NULL},
-            {"C4", NULL},
-            { NULL, NULL },
-        },
-        "C1"
-    },
-    {
-        CORE_NAME "-l-cbutton",
-        "Left C Button",
-        NULL,
-        "Select Left C Button mapping.",
+        "Select a control type. (like official controller position)",
         NULL,
         "input",
         {
-            {"C1", NULL},
-            {"C2", NULL},
-            {"C3", NULL},
-            {"C4", NULL},
-            { NULL, NULL },
-        },
-        "C2"
-    },
-    {
-        CORE_NAME "-d-cbutton",
-        "Down C Button",
-        NULL,
-        "Select Down C Button mapping.",
-        NULL,
-        "input",
-        {
-            {"C1", NULL},
-            {"C2", NULL},
-            {"C3", NULL},
-            {"C4", NULL},
-            { NULL, NULL },
-        },
-        "C3"
-    },
-    {
-        CORE_NAME "-u-cbutton",
-        "Up C Button",
-        NULL,
-        "Select Up C Button mapping.",
-        NULL,
-        "input",
-        {
-            {"C1", NULL},
-            {"C2", NULL},
-            {"C3", NULL},
-            {"C4", NULL},
-            { NULL, NULL },
-        },
-        "C4"
-    },
-    {
-        CORE_NAME "-alt-map",
-        "Independent C-button Controls",
-        NULL,
-        "Use an alternate control scheme, useful for some 3rdparty controllers.",
-        NULL,
-        "input",
-        {
-            {"False", NULL},
-            {"True", NULL},
+            {"default", NULL},
+            {"analog", NULL},
+            {"dual", NULL},
             { NULL, NULL },
         },
         "False"
