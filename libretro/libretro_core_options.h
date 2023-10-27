@@ -1579,7 +1579,7 @@ struct retro_core_option_v2_definition option_defs_us[] = {
             {"dual", NULL},
             { NULL, NULL },
         },
-        "False"
+        "default"
     },
     {
         CORE_NAME "-pak1",
