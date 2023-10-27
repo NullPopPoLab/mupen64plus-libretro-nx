@@ -1425,8 +1425,9 @@ static void update_variables(bool startup)
        var.value = NULL;
        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
        {
-          if(!strcmp(var.value, "analog"))btnmap_selected=BTNMAP_ANALOG;
           if(!strcmp(var.value, "dual"))btnmap_selected=BTNMAP_DUAL;
+          else if(!strcmp(var.value, "analog"))btnmap_selected=BTNMAP_ANALOG;
+          else btnmap_selected=BTNMAP_DEFAULT;
        }
 
        var.key = CORE_NAME "-ForceDisableExtraMem";
